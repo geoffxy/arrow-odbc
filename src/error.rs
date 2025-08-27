@@ -58,6 +58,6 @@ pub enum Error {
     )]
     EncodingInvalid { source: std::string::FromUtf8Error },
     /// Some other ODBC related error.
-    #[error("An unknown ODBC related error occurred.")]
+    #[error("An unknown ODBC related error occurred.\n{0}")]
     OtherOdbcError(odbc_api::Error),
 }
