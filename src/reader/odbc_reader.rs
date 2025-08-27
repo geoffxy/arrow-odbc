@@ -5,11 +5,11 @@ use arrow::{
     error::ArrowError,
     record_batch::{RecordBatch, RecordBatchReader},
 };
-use odbc_api::{BlockCursor, Cursor, buffers::ColumnarAnyBuffer};
+use odbc_api::{buffers::ColumnarAnyBuffer, BlockCursor, Cursor};
 
 use crate::{BufferAllocationOptions, ConcurrentOdbcReader, Error};
 
-use super::{TextEncoding, to_record_batch::ToRecordBatch};
+use super::{to_record_batch::ToRecordBatch, TextEncoding};
 
 /// Arrow ODBC reader. Implements the [`arrow::record_batch::RecordBatchReader`] trait so it can be
 /// used to fill Arrow arrays from an ODBC data source.
@@ -412,7 +412,9 @@ impl OdbcReaderBuilder {
         let buffer_size_in_rows = self.buffer_size_in_rows(bytes_per_row)?;
         let row_set_buffer =
             converter.allocate_buffer(buffer_size_in_rows, self.fallibale_allocations)?;
-        let batch_stream = cursor.bind_buffer(row_set_buffer).unwrap();
+        let batch_stream = cursor
+            .bind_buffer(row_set_buffer)
+            .map_err(|e| Error::OtherOdbcError(e))?;
 
         Ok(OdbcReader {
             converter,
