@@ -106,6 +106,10 @@ impl ToRecordBatch {
         &self,
         odbc_buffer: &ColumnarAnyBuffer,
     ) -> Result<RecordBatch, MappingError> {
+        eprintln!("buffer_to_record_batch() with schema:");
+        for f in self.schema.fields() {
+            eprintln!("  - {}: {:?}", f.name(), f.data_type());
+        }
         let arrow_columns = self
             .column_strategies
             .iter()
