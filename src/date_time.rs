@@ -23,8 +23,17 @@ use crate::{WriterError, odbc_writer::WriteStrategy, reader::MappingError};
 /// Transform date to days since unix epoch as i32
 pub fn days_since_epoch(date: &Date) -> i32 {
     let unix_epoch = NaiveDate::from_ymd_opt(1970, 1, 1).unwrap();
-    let date =
-        NaiveDate::from_ymd_opt(date.year as i32, date.month as u32, date.day as u32).unwrap();
+    let date = match NaiveDate::from_ymd_opt(date.year as i32, date.month as u32, date.day as u32) {
+        Some(d) => d,
+        None => {
+            panic!(
+                "days_since_epoch() processing invalid date: {}-{}-{}",
+                date.year,
+                date.month,
+                date.day,
+            );
+        }
+    };
     let duration = date.signed_duration_since(unix_epoch);
     duration.num_days().try_into().unwrap()
 }
