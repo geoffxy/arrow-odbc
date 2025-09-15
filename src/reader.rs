@@ -27,7 +27,8 @@ mod time;
 mod to_record_batch;
 
 use crate::date_time::{
-    days_since_epoch, ms_since_epoch, ns_since_epoch, seconds_since_epoch, us_since_epoch,
+    days_since_epoch, days_since_epoch_padded, ms_since_epoch, ns_since_epoch, seconds_since_epoch,
+    us_since_epoch,
 };
 
 pub use self::{
@@ -124,6 +125,8 @@ pub fn choose_column_strategy(
     trim_fixed_sized_character_strings: bool,
     text_encoding: TextEncoding,
 ) -> Result<Box<dyn ReadStrategy + Send>, ColumnFailure> {
+    const USE_PADDING_VAR: &str = "TAILWIND_ODBC_USE_PADDING";
+
     let strat: Box<dyn ReadStrategy + Send> = match field.data_type() {
         ArrowDataType::Boolean => {
             if field.is_nullable() {
@@ -139,7 +142,13 @@ pub fn choose_column_strategy(
         ArrowDataType::UInt8 => UInt8Type::identical(field.is_nullable()),
         ArrowDataType::Float32 => Float32Type::identical(field.is_nullable()),
         ArrowDataType::Float64 => Float64Type::identical(field.is_nullable()),
-        ArrowDataType::Date32 => Date32Type::map_infalliable(field.is_nullable(), days_since_epoch),
+        ArrowDataType::Date32 => {
+            if std::env::var(USE_PADDING_VAR).is_ok() {
+                Date32Type::map_infalliable(field.is_nullable(), days_since_epoch_padded)
+            } else {
+                Date32Type::map_infalliable(field.is_nullable(), days_since_epoch)
+            }
+        }
         ArrowDataType::Time32(TimeUnit::Second) => {
             Time32SecondType::map_infalliable(field.is_nullable(), seconds_since_midnight)
         }

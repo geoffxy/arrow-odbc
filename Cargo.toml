@@ -73,3 +73,6 @@ narrow = ["odbc-api/narrow"]
 # but only ascii, or want to use the wide functions calls for any other reason on a non-windows
 # system you can set the `wide` feature flag to overwrite this behavior.
 wide = ["odbc-api/wide"]
+
+[patch.crates-io]
+odbc-api = { git = 'https://github.com/geoffxy/odbc-api.git', rev='9b06074810db309b188661534e8bfceb5654f2ab' }
