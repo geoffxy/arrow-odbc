@@ -216,20 +216,6 @@ where
 
     fn fill_arrow_array(&self, column_view: AnySlice) -> Result<ArrayRef, MappingError> {
         let slice = column_view.as_slice::<O>().unwrap();
-        eprintln!(
-            "In NonNullableStrategy for arrow primitive type {} (odbc type: {})",
-            std::any::type_name::<P>(),
-            std::any::type_name::<O>()
-        );
-        let opts_bytes = as_bytes(slice);
-        for (i, b) in opts_bytes.iter().enumerate() {
-            eprint!("{:02x} ", b);
-            if i % 16 == 15 {
-                eprintln!();
-            }
-        }
-        eprintln!("---");
-
         let mut builder = PrimitiveBuilder::<P>::with_capacity(slice.len());
         for odbc_value in slice {
             builder.append_value(self.odbc_to_arrow.map_element(odbc_value)?);
@@ -266,21 +252,6 @@ where
 
     fn fill_arrow_array(&self, column_view: AnySlice) -> Result<ArrayRef, MappingError> {
         let opts = column_view.as_nullable_slice::<O>().unwrap();
-        eprintln!(
-            "In NullableStrategy for arrow primitive type {} (odbc type: {})",
-            std::any::type_name::<P>(),
-            std::any::type_name::<O>()
-        );
-        let (opts_raw, _) = opts.raw_values();
-        let opts_bytes = as_bytes(opts_raw);
-        for (i, b) in opts_bytes.iter().enumerate() {
-            eprint!("{:02x} ", b);
-            if i % 16 == 15 {
-                eprintln!();
-            }
-        }
-        eprintln!("---");
-
         let mut builder = PrimitiveBuilder::<P>::with_capacity(opts.len());
         for odbc_opt in opts {
             builder.append_option(
@@ -290,15 +261,6 @@ where
             );
         }
         Ok(Arc::new(builder.finish()))
-    }
-}
-
-fn as_bytes<T>(slice: &[T]) -> &[u8] {
-    unsafe {
-        std::slice::from_raw_parts(
-            slice.as_ptr() as *const u8,
-            slice.len() * std::mem::size_of::<T>(),
-        )
     }
 }
 
