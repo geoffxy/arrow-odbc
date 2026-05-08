@@ -75,4 +75,4 @@ narrow = ["odbc-api/narrow"]
 wide = ["odbc-api/wide"]
 
 [patch.crates-io]
-odbc-api = { git = 'https://github.com/geoffxy/odbc-api.git', rev='93d926651a262c6044cd41af0405404890c8f6b6' }
+odbc-api = { git = 'https://github.com/geoffxy/odbc-api.git', rev='e717735e4b4b93e8726231b491da10442ebf9f7e' }
