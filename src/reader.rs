@@ -27,8 +27,9 @@ mod time;
 mod to_record_batch;
 
 use crate::date_time::{
-    days_since_epoch, days_since_epoch_padded, ms_since_epoch, ns_since_epoch, seconds_since_epoch,
-    us_since_epoch,
+    days_since_epoch, days_since_epoch_padded, ms_since_epoch, ms_since_epoch_padded,
+    ns_since_epoch, ns_since_epoch_padded, seconds_since_epoch, seconds_since_epoch_padded,
+    us_since_epoch, us_since_epoch_padded,
 };
 
 pub use self::{
@@ -195,20 +196,49 @@ pub fn choose_column_strategy(
             Box::new(Binary::new(length))
         }
         ArrowDataType::Timestamp(TimeUnit::Second, _) => {
-            TimestampSecondType::map_infalliable(field.is_nullable(), seconds_since_epoch)
+            if std::env::var(USE_PADDING_VAR).is_ok() {
+                TimestampSecondType::map_infalliable(
+                    field.is_nullable(),
+                    seconds_since_epoch_padded,
+                )
+            } else {
+                TimestampSecondType::map_infalliable(field.is_nullable(), seconds_since_epoch)
+            }
         }
         ArrowDataType::Timestamp(TimeUnit::Millisecond, _) => {
-            TimestampMillisecondType::map_infalliable(field.is_nullable(), ms_since_epoch)
+            if std::env::var(USE_PADDING_VAR).is_ok() {
+                TimestampMillisecondType::map_infalliable(
+                    field.is_nullable(),
+                    ms_since_epoch_padded,
+                )
+            } else {
+                TimestampMillisecondType::map_infalliable(field.is_nullable(), ms_since_epoch)
+            }
         }
         ArrowDataType::Timestamp(TimeUnit::Microsecond, _) => {
-            TimestampMicrosecondType::map_infalliable(field.is_nullable(), us_since_epoch)
+            if std::env::var(USE_PADDING_VAR).is_ok() {
+                TimestampMicrosecondType::map_infalliable(
+                    field.is_nullable(),
+                    us_since_epoch_padded,
+                )
+            } else {
+                TimestampMicrosecondType::map_infalliable(field.is_nullable(), us_since_epoch)
+            }
         }
         ArrowDataType::Timestamp(TimeUnit::Nanosecond, _) => {
-            TimestampNanosecondType::map_falliable(
-                field.is_nullable(),
-                map_value_errors_to_null,
-                ns_since_epoch,
-            )
+            if std::env::var(USE_PADDING_VAR).is_ok() {
+                TimestampNanosecondType::map_falliable(
+                    field.is_nullable(),
+                    map_value_errors_to_null,
+                    ns_since_epoch_padded,
+                )
+            } else {
+                TimestampNanosecondType::map_falliable(
+                    field.is_nullable(),
+                    map_value_errors_to_null,
+                    ns_since_epoch,
+                )
+            }
         }
         ArrowDataType::FixedSizeBinary(length) => {
             Box::new(FixedSizedBinary::new((*length).try_into().unwrap()))
