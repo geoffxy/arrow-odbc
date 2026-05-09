@@ -18,7 +18,7 @@ use odbc_api::{
     sys::{Date, Time, Timestamp},
 };
 
-use crate::{WriterError, odbc_writer::WriteStrategy, reader::MappingError};
+use crate::{odbc_writer::WriteStrategy, reader::MappingError, WriterError};
 
 /// Transform date to days since unix epoch as i32
 pub fn days_since_epoch(date: &Date) -> i32 {
@@ -73,6 +73,10 @@ pub fn ms_since_epoch(from: &Timestamp) -> i64 {
 }
 
 pub fn us_since_epoch(from: &Timestamp) -> i64 {
+    eprintln!(
+        "Converting timestamp value: {}-{}-{} {}:{}:{}.{} to microseconds since epoch",
+        from.year, from.month, from.day, from.hour, from.minute, from.second, from.fraction
+    );
     let ndt = NaiveDate::from_ymd_opt(from.year as i32, from.month as u32, from.day as u32)
         .unwrap()
         .and_hms_nano_opt(
