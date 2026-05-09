@@ -14,7 +14,7 @@ use arrow::{
 };
 use chrono::{Datelike, NaiveDate};
 use odbc_api::{
-    buffers::{AnySliceMut, BufferDesc, DatePadded, TextColumnSliceMut, TimestampPadded},
+    buffers::{AnySliceMut, BufferDesc, DatePadded, TextColumnSliceMut},
     sys::{Date, Time, Timestamp},
 };
 
@@ -59,28 +59,7 @@ pub fn seconds_since_epoch(from: &Timestamp) -> i64 {
     ndt.and_utc().timestamp()
 }
 
-pub fn seconds_since_epoch_padded(from: &TimestampPadded) -> i64 {
-    let ndt = NaiveDate::from_ymd_opt(from.year as i32, from.month as u32, from.day as u32)
-        .unwrap()
-        .and_hms_opt(from.hour as u32, from.minute as u32, from.second as u32)
-        .unwrap();
-    ndt.and_utc().timestamp()
-}
-
 pub fn ms_since_epoch(from: &Timestamp) -> i64 {
-    let ndt = NaiveDate::from_ymd_opt(from.year as i32, from.month as u32, from.day as u32)
-        .unwrap()
-        .and_hms_nano_opt(
-            from.hour as u32,
-            from.minute as u32,
-            from.second as u32,
-            from.fraction,
-        )
-        .unwrap();
-    ndt.and_utc().timestamp_millis()
-}
-
-pub fn ms_since_epoch_padded(from: &Timestamp) -> i64 {
     let ndt = NaiveDate::from_ymd_opt(from.year as i32, from.month as u32, from.day as u32)
         .unwrap()
         .and_hms_nano_opt(
@@ -106,38 +85,7 @@ pub fn us_since_epoch(from: &Timestamp) -> i64 {
     ndt.and_utc().timestamp_micros()
 }
 
-pub fn us_since_epoch_padded(from: &TimestampPadded) -> i64 {
-    let ndt = NaiveDate::from_ymd_opt(from.year as i32, from.month as u32, from.day as u32)
-        .unwrap()
-        .and_hms_nano_opt(
-            from.hour as u32,
-            from.minute as u32,
-            from.second as u32,
-            from.fraction,
-        )
-        .unwrap();
-    ndt.and_utc().timestamp_micros()
-}
-
 pub fn ns_since_epoch(from: &Timestamp) -> Result<i64, MappingError> {
-    let ndt = NaiveDate::from_ymd_opt(from.year as i32, from.month as u32, from.day as u32)
-        .unwrap()
-        .and_hms_nano_opt(
-            from.hour as u32,
-            from.minute as u32,
-            from.second as u32,
-            from.fraction,
-        )
-        .unwrap();
-
-    // The dates that can be represented as nanoseconds are between 1677-09-21T00:12:44.0 and
-    // 2262-04-11T23:47:16.854775804
-    ndt.and_utc()
-        .timestamp_nanos_opt()
-        .ok_or(MappingError::OutOfRangeTimestampNs { value: ndt })
-}
-
-pub fn ns_since_epoch_padded(from: &Timestamp) -> Result<i64, MappingError> {
     let ndt = NaiveDate::from_ymd_opt(from.year as i32, from.month as u32, from.day as u32)
         .unwrap()
         .and_hms_nano_opt(
